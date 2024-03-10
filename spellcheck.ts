@@ -4,12 +4,14 @@ import {
   getSuggestions,
   readTextFile,
 } from "./utils";
+import * as path from "path";
 
-const filePath = __dirname + "\\" + process.argv[3];
+// const filePath = __dirname + "\\" + process.argv[3];
+const filePath = path.resolve(__dirname, process.argv[3]);
 console.log("filePath: ", filePath);
 const wordList = readTextFile(filePath);
 
-const dictionaryPath = __dirname + "\\" + process.argv[2];
+const dictionaryPath = path.resolve(__dirname, process.argv[2]);
 console.log("dictionaryPath: ", dictionaryPath);
 const dictionaryMap = createDictionaryMap(dictionaryPath);
 console.log("dictionary: ", dictionaryMap);
