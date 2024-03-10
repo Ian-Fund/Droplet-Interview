@@ -28,13 +28,13 @@ added to a list of misspelled words. This list is returned and printed for the u
 
 # Caveats for misspelled words
 
-    One issue identified is that a map is probably not the best data structure to use for this. Only the key is used, never the value. So a set
-    would probably be better. However, I was a bit late in the process when I realized this and decided to develop more features instead of refactoring
-    data structures that would change a lot of things.
+One issue identified is that a map is probably not the best data structure to use for this. Only the key is used, never the value. So a set
+would probably be better. However, I was a bit late in the process when I realized this and decided to develop more features instead of refactoring
+data structures that would change a lot of things.
 
 
-    The larger issue is space and time. The dictionary is very large. If the text file is also very large it could cause slow run times. Worst case scenario,
-    time complexity is O N^2.  Given more time, a more optimal solution could be found.
+The larger issue is space and time. The dictionary is very large. If the text file is also very large it could cause slow run times. Worst case scenario,
+time complexity is O N^2.  Given more time, a more optimal solution could be found.
 
 # Suggestions
 
