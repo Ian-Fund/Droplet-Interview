@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSuggestions = exports.findMisspelledWords = exports.readTextFile = exports.createDictionaryMap = void 0;
+exports.findWordPositions = exports.getContext = exports.getSuggestions = exports.findMisspelledWords = exports.readTextFile = exports.createDictionaryMap = void 0;
 var fs_1 = require("fs");
 var levenshtein = require("damerau-levenshtein");
 // Read the dictionary file and convert it to a map
@@ -30,7 +30,6 @@ function readTextFile(filePath) {
             .replace(/[^\w\s]|[\d]/g, "")
             .replace(/[\n\r]/g, "")
             .split(" ");
-        console.log("wordList: ", wordList);
     }
     catch (err) {
         console.error(err);
@@ -43,7 +42,9 @@ function findMisspelledWords(dictionary, wordList) {
     var misspelledWords = [];
     for (var i = 0; i < wordList.length; i++) {
         if (!dictionary[wordList[i].toLowerCase()]) {
-            misspelledWords.push(wordList[i]);
+            if (!misspelledWords.includes(wordList[i])) {
+                misspelledWords.push(wordList[i]);
+            }
         }
     }
     return misspelledWords;
@@ -60,3 +61,40 @@ function getSuggestions(word, dictionary) {
     return suggestions;
 }
 exports.getSuggestions = getSuggestions;
+function getContext(misspelledWords, wordList) {
+    var surroundingContext = [];
+    for (var i = 0; i < wordList.length; i++) {
+        var word = wordList[i];
+        if (misspelledWords.includes(word)) {
+            var startIndex = Math.max(0, i - 2);
+            var endIndex = Math.min(i + 2, wordList.length - 1);
+            var contextWords = wordList.slice(startIndex, endIndex + 1).join(" ");
+            surroundingContext.push(contextWords);
+        }
+    }
+    return surroundingContext;
+}
+exports.getContext = getContext;
+function findWordPositions(filePath, word) {
+    var wordPositions = [];
+    try {
+        var data = (0, fs_1.readFileSync)(filePath, "utf8");
+        var lines = data
+            .replace(/[^\w\s]|[\r]/g, "")
+            .split("\n")
+            .map(function (line) { return line.split(" "); });
+        for (var row = 0; row < lines.length; row++) {
+            var line = lines[row];
+            for (var column = 0; column < line.length; column++) {
+                if (line[column] === word) {
+                    wordPositions.push({ row: row + 1, column: column + 1 });
+                }
+            }
+        }
+    }
+    catch (err) {
+        console.error(err);
+    }
+    return wordPositions;
+}
+exports.findWordPositions = findWordPositions;

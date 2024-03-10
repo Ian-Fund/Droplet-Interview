@@ -30,7 +30,6 @@ export function readTextFile(filePath: string): string[] {
       .replace(/[^\w\s]|[\d]/g, "")
       .replace(/[\n\r]/g, "")
       .split(" ");
-    console.log("wordList: ", wordList);
   } catch (err) {
     console.error(err);
   }
@@ -44,7 +43,9 @@ export function findMisspelledWords(
   let misspelledWords: string[] = [];
   for (let i = 0; i < wordList.length; i++) {
     if (!dictionary[wordList[i].toLowerCase()]) {
-      misspelledWords.push(wordList[i]);
+      if (!misspelledWords.includes(wordList[i])) {
+        misspelledWords.push(wordList[i]);
+      }
     }
   }
   return misspelledWords;
@@ -67,4 +68,46 @@ export function getSuggestions(
     }
   }
   return suggestions;
+}
+
+export function getContext(
+  misspelledWords: string[],
+  wordList: string[]
+): string[] {
+  const surroundingContext: string[] = [];
+  for (let i = 0; i < wordList.length; i++) {
+    const word = wordList[i];
+    if (misspelledWords.includes(word)) {
+      const startIndex = Math.max(0, i - 2);
+      const endIndex = Math.min(i + 2, wordList.length - 1);
+      const contextWords = wordList.slice(startIndex, endIndex + 1).join(" ");
+      surroundingContext.push(contextWords);
+    }
+  }
+  return surroundingContext;
+}
+
+export function findWordPositions(
+  filePath: string,
+  word: string
+): { row: number; column: number }[] {
+  const wordPositions: { row: number; column: number }[] = [];
+  try {
+    const data = readFileSync(filePath, "utf8");
+    const lines = data
+      .replace(/[^\w\s]|[\r]/g, "")
+      .split("\n")
+      .map((line) => line.split(" "));
+    for (let row = 0; row < lines.length; row++) {
+      const line = lines[row];
+      for (let column = 0; column < line.length; column++) {
+        if (line[column] === word) {
+          wordPositions.push({ row: row + 1, column: column + 1 });
+        }
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  }
+  return wordPositions;
 }
