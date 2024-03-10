@@ -3,15 +3,15 @@
 # Prereqs for running:
 
      node installed
-     typescript installed
      repo downloaded and unzipped
 
 # Steps to run:
 
-     open terminal/cmd
-      navigate to extracted zip folder
-      run command: "tsc spellcheck.ts"
-      run command: "node spellcheck.js dictionary.txt text.txt"
+    - open terminal/cmd
+    - navigate to extracted zip folder
+    - run command: `npm install`
+    - run example with: `npx ts-node spellcheck.ts dictionary.txt text.txt`
+    - run tests with : `npx jest`
 
 I decided to tackle the spellchecker! I'll briefly describe my thought process behind each feature as well as any caveats or issues I ran into.
 
@@ -47,7 +47,7 @@ the words. I prioritized getting features working for more typical input. Given 
 
 # Line and Column
 
-    I split the text file into an array of arrays where each item in the array is a row and each item in a row is a column. Then I took the misspelled word and searched for it in the rows and returned values of its row and column.
+    I split the text file into an array of arrays where each item in the array is a row and each item in a row is a column. Then I took the misspelled word and searched for it in the rows and r eturned values of its row and column. I changed the name of column to word to make it a bit more clear to
 
 # Surrounding Context
 
@@ -65,4 +65,4 @@ the words. I prioritized getting features working for more typical input. Given 
 
 # Unit Tests
 
-    I attempted to make a test suite as I was developing. However, I have only done unit tests at work and when I tried to get them working my computer started acting up. I decided that I would rather get more feature work done than deliver a test suite given the time constraints.
+I wrote up some unit tests to test the functions that read files. Given more time, I would expand the suite to cover all functions.

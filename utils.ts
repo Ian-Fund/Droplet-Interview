@@ -1,17 +1,15 @@
 import { readFileSync } from "fs";
-import * as levenshtein from "damerau-levenshtein";
+import levenshtein from "damerau-levenshtein";
+import { text } from "stream/consumers";
+import { string } from "yargs";
 
 // Read the dictionary file and convert it to a map
-export function createDictionaryMap(dictionaryPath: string): {
+export function createDictionaryMap(dictionaryData: string): {
   [key: string]: boolean;
 } {
   const dictionaryMap: { [key: string]: boolean } = {};
   try {
-    const dictionaryData = readFileSync(dictionaryPath, "utf8");
-    const dictionaryList = dictionaryData
-      .replace(/[^\w\s]|[\d]/g, "")
-      .replace(/[\r]/g, "")
-      .split("\n");
+    const dictionaryList = dictionaryData.replace(/[\r]/g, "").split("\n");
 
     dictionaryList.forEach((word) => {
       dictionaryMap[word] = true;
@@ -22,13 +20,13 @@ export function createDictionaryMap(dictionaryPath: string): {
   return dictionaryMap;
 }
 
-export function readTextFile(filePath: string): string[] {
+export function createWordList(textData: string): string[] {
   let wordList: string[] = [];
   try {
-    const data = readFileSync(filePath, "utf8");
-    wordList = data
-      .replace(/[^\w\s]|[\d]/g, "")
-      .replace(/[\n\r]/g, "")
+    wordList = textData
+      .replace(/[\r]/g, "")
+      .replace(/[\n]/g, " ")
+      .replace(/[^\w\s]/g, "")
       .split(" ");
   } catch (err) {
     console.error(err);
@@ -55,14 +53,9 @@ export function getSuggestions(
   word: string,
   dictionary: { [key: string]: boolean }
 ): string[] {
-  interface LevenshteinResponse {
-    steps: number;
-    relative: number;
-    similarity: number;
-  }
   const suggestions: string[] = [];
   for (const dictWord in dictionary) {
-    const lev: LevenshteinResponse = levenshtein(word, dictWord);
+    const lev = levenshtein(word, dictWord);
     if (lev.steps < 3 && lev.similarity > 0.6) {
       suggestions.push(dictWord);
     }
@@ -73,36 +66,35 @@ export function getSuggestions(
 export function getContext(
   misspelledWords: string[],
   wordList: string[]
-): string[] {
-  const surroundingContext: string[] = [];
+): [string, string][] {
+  const surroundingContext: [string, string][] = [];
   for (let i = 0; i < wordList.length; i++) {
     const word = wordList[i];
     if (misspelledWords.includes(word)) {
       const startIndex = Math.max(0, i - 2);
       const endIndex = Math.min(i + 2, wordList.length - 1);
       const contextWords = wordList.slice(startIndex, endIndex + 1).join(" ");
-      surroundingContext.push(contextWords);
+      surroundingContext.push([contextWords, word]);
     }
   }
   return surroundingContext;
 }
 
 export function findWordPositions(
-  filePath: string,
+  textData: string,
   word: string
-): { row: number; column: number }[] {
-  const wordPositions: { row: number; column: number }[] = [];
+): { row: number; word: number }[] {
+  const wordPositions: { row: number; word: number }[] = [];
   try {
-    const data = readFileSync(filePath, "utf8");
-    const lines = data
+    const lines = textData
       .replace(/[^\w\s]|[\r]/g, "")
       .split("\n")
       .map((line) => line.split(" "));
     for (let row = 0; row < lines.length; row++) {
       const line = lines[row];
-      for (let column = 0; column < line.length; column++) {
-        if (line[column] === word) {
-          wordPositions.push({ row: row + 1, column: column + 1 });
+      for (let wordindex = 0; wordindex < line.length; wordindex++) {
+        if (line[wordindex] === word) {
+          wordPositions.push({ row: row + 1, word: wordindex + 1 });
         }
       }
     }

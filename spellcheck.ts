@@ -1,18 +1,20 @@
+import { readFileSync } from "fs";
 import {
   createDictionaryMap,
   findMisspelledWords,
   findWordPositions,
   getContext,
   getSuggestions,
-  readTextFile,
+  createWordList,
 } from "./utils";
 import * as path from "path";
 
 const filePath = path.resolve(__dirname, process.argv[3]);
-const wordList = readTextFile(filePath);
+const fileData = readFileSync(filePath, "utf8");
+const wordList = createWordList(fileData);
 
 const dictionaryPath = path.resolve(__dirname, process.argv[2]);
-const dictionaryMap = createDictionaryMap(dictionaryPath);
+const dictionaryMap = createDictionaryMap(readFileSync(dictionaryPath, "utf8"));
 
 const misspelledWords = findMisspelledWords(dictionaryMap, wordList);
 console.log("The misspelled words are: " + misspelledWords);
@@ -23,8 +25,10 @@ misspelledWords.forEach((word) => {
 });
 
 const misspelledWordContext = getContext(misspelledWords, wordList);
-console.log("The misspelled word context is: ", misspelledWordContext);
-
+misspelledWordContext.forEach(([context, word]) => {
+  console.log("Context for word", word, ":", context);
+});
+console.log();
 misspelledWords.forEach((word) => {
-  console.log(findWordPositions(filePath, word));
+  console.log("Misspelled Word: ", word, findWordPositions(fileData, word));
 });
