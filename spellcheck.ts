@@ -6,7 +6,6 @@ import {
 } from "./utils";
 import * as path from "path";
 
-// const filePath = __dirname + "\\" + process.argv[3];
 const filePath = path.resolve(__dirname, process.argv[3]);
 console.log("filePath: ", filePath);
 const wordList = readTextFile(filePath);
